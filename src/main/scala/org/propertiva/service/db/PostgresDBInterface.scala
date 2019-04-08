@@ -3,9 +3,12 @@ package org.propertiva.service.db
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
+import org.postgresql.ds.PGPoolingDataSource
+import org.propertiva.model.Building
+import org.propertiva.service.db.db_helpers.BuildingDB
 
 object PostgresDBInterface {
-  private var buildingDBInterface = null
+  private var buildingDBInterface = BuildingDB.get(DSL.using(getDataSource(BuildingDB.getDBName), SQLDialect.POSTGRES))
   private val LOGGER = LoggerFactory.getLogger(classOf[PostgresDBInterface])
 
   private def getDataSource(dbName: String) = {
@@ -24,14 +27,9 @@ object PostgresDBInterface {
 
 class PostgresDBInterface() extends DBInterface {
 
-  if (PostgresDBInterface.buildingDBInterface == null) {
-    PostgresDBInterface.buildingDBInterface =
-      PostgresDBInterface.buildingDBInterface.get(DSL.using(PostgresDBInterface.getDataSource(""), SQLDialect.POSTGRES));
-  }
 
-
-  override def persistTradables(bittrexTradables: List[Tradable], time: String): Unit = {
-    PostgresDBInterface.dataInterface.persistTradables(bittrexTradables, time)
+  override def saveBuildings(buildings: List[Building]): Unit = {
+    PostgresDBInterface.buildingDBInterface.saveBuildings(buildings)
   }
 
 }
