@@ -2,7 +2,9 @@ package org.propertiva.service.db.db_helpers
 
 import org.jooq.{DSLContext, Record}
 import org.jooq.impl.DSL.{field, table}
-import org.propertiva.model.Building
+import org.jooq.util.postgres.PostgresDataType
+import org.propertiva.exceptions.BuildingException
+import org.propertiva.model.{Address, Building, Coordinates}
 import org.slf4j.{Logger, LoggerFactory}
 
 object BuildingDB {
@@ -27,6 +29,7 @@ class BuildingDB private(var context: DSLContext) {
   }
 
   def saveBuilding(building: Building) = {
+
     context
       .insertInto(table(s"\"${BuildingDB.getDBName}\""),
         field(Building.ID), field(Building.CODE), field(Building.STREET_ADR),field(Building.ZIP_CODE),field(Building.LAYOUT), field(Building.SIZE), field(Building.LATITUDE), field(Building.LONGITUDE))
@@ -34,8 +37,31 @@ class BuildingDB private(var context: DSLContext) {
       .execute
   }
 
-  def getBuilding(building: Building) = {
-    val record = context.selectFrom(table("\"market_cap\"")).where("time = '" + time + "'").fetchOne
+  def getBuilding(id: String) = {
+
+    val record = context.selectFrom(table(s"\"${BuildingDB.getDBName}\"")).where(s"${Building.ID} = '" + id + "'").fetchOne
+    if(record != null){
+      val id = record.get(field(Building.ID, PostgresDataType.BIGINT))
+      val code = record.get(field(Building.CODE, PostgresDataType.INT))
+      val layout = record.get(field(Building.LAYOUT, PostgresDataType.INT))
+      val size = record.get(field(Building.SIZE, PostgresDataType.INT))
+      val thumbnailUrl = record.get(field(Building.THUMBNAIL_URL, PostgresDataType.TEXT))
+      val address =  getAddress(record)
+      new Building(address, id, code, layout, size, thumbnailUrl)
+
+    }else{
+      throw new BuildingException(s"Did not find building: $id")
+    }
+  }
+
+  private def getAddress(record: Record) : Address = {
+
+    val longitude = record.get(field(Building.LONGITUDE, PostgresDataType.FLOAT8))
+    val latitude = record.get(field(Building.LATITUDE, PostgresDataType.FLOAT8))
+    val streetAddr = record.get(field(Building.STREET_ADR, PostgresDataType.TEXT))
+    val zip = record.get(field(Building.ZIP_CODE, PostgresDataType.INT))
+    val coordinates = Coordinates(longitude,latitude)
+    Address(streetAddr, "", coordinates,"","","", zip)
   }
 }
 
