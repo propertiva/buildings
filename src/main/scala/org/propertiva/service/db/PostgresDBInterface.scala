@@ -16,10 +16,10 @@ object PostgresDBInterface {
     val source = new PGPoolingDataSource()
     source.setDataSourceName(dbName + randNum)
     source.setPortNumber(5432)
-    source.setServerName("crypto-land.postgres.database.azure.com")
+    source.setServerName("localhost")
     source.setDatabaseName(dbName)
-    source.setUser("stanwizzy@crypto-land")
-    source.setPassword("Ab34567@")
+    source.setUser("stanleyopara")
+    source.setPassword("")
     source.setMaxConnections(10)
     source
   }

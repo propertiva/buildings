@@ -1,26 +1,31 @@
 package org.propertiva.service.db
 
-class DBMgr {
+object DBMgr {
 
-  private var dbMgr : DBMgr = null
+  private var dbMgr: DBMgr = null
   private val POSTGRES_INTERFACE = "postgres"
   private val MONGO_INTERFACE = "mongo"
-  private var dbInterface : DBInterface = null
 
-  def getDBMgr: DBMgr = {
+
+  def get: DBMgr = {
     if (dbMgr == null) dbMgr = new DBMgr()
     dbMgr
   }
+}
 
-  def getInterface: DBInterface = getInterface(POSTGRES_INTERFACE)
+class DBMgr private (){
+
+  private var dbInterface: DBInterface = null
+
+  def getInterface: DBInterface = getInterface(DBMgr.POSTGRES_INTERFACE)
 
   def getInterface(interfaceType: String): DBInterface = {
     if (dbInterface == null) {
       dbInterface = new PostgresDBInterface()
       interfaceType match {
-        case POSTGRES_INTERFACE =>
+        case DBMgr.POSTGRES_INTERFACE =>
           dbInterface
-        case MONGO_INTERFACE =>
+        case DBMgr.MONGO_INTERFACE =>
           dbInterface
         case _ =>
           dbInterface

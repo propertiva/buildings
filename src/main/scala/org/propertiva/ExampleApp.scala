@@ -8,6 +8,8 @@ import org.propertiva.api.filter.DiagnosticContextFilter
 import org.propertiva.api.health.DefaultHealthCheck
 import org.propertiva.api.resource.{ExampleResource, RootResource}
 import io.dropwizard.setup.Environment
+import org.propertiva.model.{Address, Building, Coordinates}
+import org.propertiva.service.db.DBMgr
 
 class ExampleApp extends io.dropwizard.Application[ExampleAppConfig] {
   override def getName: String = "dropwizard-scala-example"
@@ -35,5 +37,11 @@ class ExampleApp extends io.dropwizard.Application[ExampleAppConfig] {
 
 
 object ExampleApp {
-  def main(args: Array[String]): Unit = new ExampleApp().run(args: _*)
+  def main(args: Array[String]): Unit = {
+
+    val address = Address("","",Coordinates(0.0,0.0),"","","",1)
+    val building = new Building(address, 0, 0, 0, 0, "")
+    DBMgr.get.getInterface.saveBuildings(List(building))
+    //new ExampleApp().run(args: _*)
+  }
 }

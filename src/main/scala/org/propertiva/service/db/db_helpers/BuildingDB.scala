@@ -2,6 +2,7 @@ package org.propertiva.service.db.db_helpers
 
 import org.jooq.{DSLContext, Record}
 import org.jooq.impl.DSL.{field, table}
+import org.jooq.impl.SQLDataType
 import org.jooq.util.postgres.PostgresDataType
 import org.propertiva.exceptions.BuildingException
 import org.propertiva.model.{Address, Building, Coordinates}
@@ -19,6 +20,7 @@ object BuildingDB {
   }
 
   val getDBName = "building"
+  val getBuildingTableName = "buildings"
 }
 
 class BuildingDB private(var context: DSLContext) {
@@ -30,16 +32,27 @@ class BuildingDB private(var context: DSLContext) {
 
   def saveBuilding(building: Building) = {
 
+    /*context.createTable(BuildingDB.getBuildingTableName)
+      .column(Building.ID, SQLDataType.BIGINT)
+      .column(Building.CODE, SQLDataType.INTEGER)
+      .column(Building.STREET_ADR, SQLDataType.VARCHAR)
+      .column(Building.ZIP_CODE, SQLDataType.INTEGER)
+      .column(Building.LAYOUT, SQLDataType.INTEGER)
+      .column(Building.SIZE, SQLDataType.INTEGER)
+      .column(Building.LATITUDE, SQLDataType.DOUBLE)
+      .column(Building.LONGITUDE, SQLDataType.DOUBLE)
+      .execute();*/
+
     context
-      .insertInto(table(s"\"${BuildingDB.getDBName}\""),
-        field(Building.ID), field(Building.CODE), field(Building.STREET_ADR),field(Building.ZIP_CODE),field(Building.LAYOUT), field(Building.SIZE), field(Building.LATITUDE), field(Building.LONGITUDE))
+      .insertInto(table(s"""${BuildingDB.getBuildingTableName}"""),
+        field(Building.ID, classOf[Long]), field(Building.CODE, classOf[Int]), field(Building.STREET_ADR, classOf[String]),field(Building.ZIP_CODE, classOf[Int]),field(Building.LAYOUT, classOf[Int]), field(Building.SIZE, classOf[Int]), field(Building.LATITUDE, classOf[Double]), field(Building.LONGITUDE, classOf[Double]))
       .values(building.id, building.code, building.getStreetAddress,building.getZipCode, building.layout, building.size, building.getCoordinates().latitude, building.getCoordinates().longitude)
       .execute
   }
 
   def getBuilding(id: String) = {
 
-    val record = context.selectFrom(table(s"\"${BuildingDB.getDBName}\"")).where(s"${Building.ID} = '" + id + "'").fetchOne
+    val record = context.selectFrom(table(s"""${BuildingDB.getDBName}""")).where(s"${Building.ID} = '" + id + "'").fetchOne
     if(record != null){
       val id = record.get(field(Building.ID, PostgresDataType.BIGINT))
       val code = record.get(field(Building.CODE, PostgresDataType.INT))
